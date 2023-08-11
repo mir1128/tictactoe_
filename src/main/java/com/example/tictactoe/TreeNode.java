@@ -7,6 +7,7 @@ import java.util.*;
 public class TreeNode {
     private static final Random random = new Random();
 
+    @Getter
     private Board board;
 
     @Getter

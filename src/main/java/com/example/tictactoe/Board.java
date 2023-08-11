@@ -3,7 +3,9 @@ package com.example.tictactoe;
 import lombok.Getter;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -15,20 +17,26 @@ public class Board implements Cloneable {
 
     public Board() {
         this.board = new byte[9];
-        this.currentPlayer = 'x';
+        this.currentPlayer = 'o';
     }
 
     public Board move(int move) {
         Board clone = clone();
         if (clone.board[move] == 0) {
-            clone.board[move] = this.currentPlayer;
             clone.currentPlayer = (byte) ((this.currentPlayer == 'x') ? 'o' : 'x');
+            clone.board[move] = clone.currentPlayer;
         }
         return clone;
     }
 
     public String encode() {
-        return new String(this.board);
+        StringBuilder stringBuilder = new StringBuilder();
+        for (byte b : this.board) {
+            if (b == 120) stringBuilder.append("x");
+            if (b == 111) stringBuilder.append("o");
+            if (b == 0) stringBuilder.append(".");
+        }
+        return stringBuilder.toString();
     }
 
     public List<Integer> possibleMoves() {

@@ -1,10 +1,13 @@
 package com.example.tictactoe;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+@Slf4j
 public class Mcst {
     private static final Random random = new Random();
 
@@ -15,6 +18,7 @@ public class Mcst {
             backPropagate(node, rollout);
         }
 
+//        JgraphtDemo.display(root);
         TreeNode bestMove = selectBest(root, 0);
         return bestMove.getMove();
     }
@@ -37,7 +41,7 @@ public class Mcst {
         TreeNode current = root;
         while (current != null && !current.isTerminal()) {
             if (current.isFullyExpanded()) {
-                current = selectBest(current, 1);
+                current = selectBest(current, 2);
             } else {
                 return expand(current);
             }
@@ -52,19 +56,21 @@ public class Mcst {
         for (TreeNode child : current.getChildren()) {
             int currentPlayer = child.getTurn() == 'x' ? 1 : -1;
 
-            int exploitation = 0;
+            double exploitation = 0;
             if (child.getVisits() != 0) {
-                exploitation = (currentPlayer * child.getScores() / child.getVisits());
+                exploitation = (currentPlayer * (double)child.getScores() / child.getVisits());
             }
 
-            double exploration = explorationConstant * Math.sqrt(current.getVisits()) / (1 + child.getVisits());
+            double exploration = explorationConstant * Math.sqrt(Math.log((float) current.getVisits() / child.getVisits()));
 
             double moveScore = exploitation + exploration;
+
+//            log.info("{} : move score: {}",  child.getBoard().encode(), moveScore);
 
             if (moveScore > bestScore) {
                 bestMoves = new ArrayList<>(Collections.singletonList(child));
                 bestScore = moveScore;
-            } else if (moveScore == bestScore) {
+            } else if (Math.abs(moveScore - bestScore) < 0.0001) {
                 bestMoves.add(child);
             }
         }
@@ -72,7 +78,9 @@ public class Mcst {
         if (bestMoves.isEmpty()) {
             throw new RuntimeException("best move is empty.");
         }
-        return bestMoves.get(random.nextInt(bestMoves.size()));
+        TreeNode treeNode = bestMoves.get(random.nextInt(bestMoves.size()));
+//        log.info("select {}, score: {}", treeNode.getBoard().encode(), bestScore);
+        return treeNode;
     }
 
     private TreeNode expand(TreeNode current) {
